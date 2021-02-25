@@ -1,0 +1,90 @@
+---
+title: "Assignment 3 Task 3"
+author: "Kelsie Fronheiser"
+date: "2/24/2021"
+output: 
+  html_document:
+    theme: lumen
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE, message = FALSE)
+```
+The text used in this report is The Great Gatsby by F. Scott Fitzgerald, downloaded from [Project Guntenberg](https://www.gutenberg.org/ebooks/64317).
+```{r}
+library(tidyverse)
+library(tidytext)
+library(textdata)
+library(pdftools)
+library(ggwordcloud)
+library(RColorBrewer)
+
+gatsby <- pdf_text("the greatgatsby.pdf")
+
+gatsby_tidy <- data.frame(gatsby) %>% 
+  mutate(text_full = str_split(gatsby, pattern = "\\r\n")) %>% 
+  unnest(text_full) %>% 
+  mutate(text_full = str_trim(text_full))
+
+gatsby_df <- gatsby_tidy %>% 
+  slice(-(1:39)) %>% 
+  slice(-(4837:5141)) %>% 
+  mutate(chapter = case_when(
+    str_detect(text_full, pattern = "Chapter") ~ text_full,
+    TRUE ~ NA_character_
+  )) %>% 
+  fill(chapter) %>% 
+  separate(col = chapter, into = c("ch", "no"), sep = " ") %>% 
+  mutate(chapter = as.numeric(as.roman(no)))
+
+gatsby_tokens <- gatsby_df %>% 
+  unnest_tokens(word, text_full) %>% 
+  dplyr::select(-gatsby)
+
+gatsby_nostopwords <- gatsby_tokens %>% 
+  anti_join(stop_words)
+
+nonstop_counts <- gatsby_nostopwords %>% 
+  count(word)
+
+```
+## Word Cloud of Top 100 Words in The Great Gatsby
+```{r}
+top100_words <- nonstop_counts %>% 
+  arrange(-n) %>% 
+  slice(1:100)
+
+
+word_cloud <-  ggplot(data = top100_words, aes(label = word)) +
+  geom_text_wordcloud(aes(color = n, size = n), shape = "square") + 
+  scale_size_area(max_size = 18) + 
+  theme_void() +
+  scale_color_gradient(low = "orchid4",high = "blue4")
+
+word_cloud
+```
+
+**Figure 1.** This word cloud shows the top 100 words used in The Great Gatsby. The frequency of word use is displayed by size and color, with the largest dark blue word being the most used; Gatbsy.
+
+## Sentiment Analysis of The Great Gatsby by Chapter
+```{r}
+gatsby_afinn <- gatsby_nostopwords %>% 
+  inner_join(get_sentiments("afinn"))
+
+afinn_counts <- gatsby_afinn %>% 
+  count(chapter, value)
+
+afinn_means <- gatsby_afinn %>% 
+  group_by(chapter) %>% 
+  summarize(mean_afinn = mean(value))
+
+ggplot() +
+  geom_col(data = afinn_means, aes(x = chapter, y = mean_afinn), fill = "dodgerblue4", legend = FALSE) +
+  theme_minimal() +
+  labs(x = "Chapter", y = "Mean Sentiment")
+```
+
+**Figure 2.** This sentiment analysis shows the mean sentiment value per chapter. The analysis was run using the 'afinn' lexicon.

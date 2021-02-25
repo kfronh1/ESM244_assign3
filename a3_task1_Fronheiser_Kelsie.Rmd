@@ -22,15 +22,11 @@ The spatial data used in this report was collected from the [Oil Spill Incident 
 ```{r}
 oil_spills <- read_sf(here("ds394.shp"))
 ca_counties <- read_sf(here("ca_counties","CA_Counties_TIGER2016.shp"))
-```
 
-```{r}
 ca_subset <- ca_counties %>% 
   select(NAME, ALAND) %>% 
   rename(county_name = NAME, land_area = ALAND)
-```
 
-```{r}
 #ca_subset %>% st_crs()
 #oil_spills %>% st_crs()
 
@@ -54,7 +50,7 @@ tm_shape(ca_subset) +
 ```
 
 
-Figure 1. California oil spill events for the year 2008 are displayed by red points. Click on a point to see information about the individual spill event.
+**Figure 1.** California oil spill events for the year 2008 are displayed by red points. Click on a point to see information about the individual spill event.
 ```{r}
 ca_oil <- ca_subset %>% 
   st_join(oil_spills)
@@ -72,4 +68,4 @@ ggplot(data = oil_counts) +
   labs(fill = "Number of oil spills")
 ```
 
-Figure 2. California oil spill events for the year 2008 are summed by county, with the abundance of spills displayed by a gradient between zero spills in white to 500+ spills in red. The county with the highest number of oil spills in 2008 was Los Angeles County.
+**Figure 2.** California oil spill events for the year 2008 are summed by county, with the abundance of spills displayed by a gradient between zero spills in white to 500+ spills in red. The county with the highest number of oil spills in 2008 was Los Angeles County.
