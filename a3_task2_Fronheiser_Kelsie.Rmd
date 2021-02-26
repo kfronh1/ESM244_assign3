@@ -1,0 +1,82 @@
+---
+title: "Assignment 3 Task 2"
+author: "Kelsie Fronheiser"
+date: "2/23/2021"
+output: 
+  html_document:
+    theme: lumen
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE, message = FALSE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(gstat)
+library(stars)
+library(raster)
+library(rnaturalearth)
+```
+
+The spatial data used in this report is from Kaschner, K., Rius-Barile, J., Kesner-Reyes, K., Garilao, C., Kullander, S., Rees, T., & Froese, R. (2016). [AquaMaps: Predicted range maps for aquatic species.](www.aquamaps.org)
+
+## Cetacean Richness Raster
+```{r}
+
+my_files <- list.files(path = here("ca_cetaceans"), full.names = TRUE)
+
+ce_data <- raster::stack(my_files)
+
+#plot(ce_data)
+
+ce_df <- rasterToPoints(ce_data) %>% 
+  as.data.frame()
+
+ce_presence <- function(x, thresh = 0.7){
+  y <- ifelse(x >= thresh, 1, NA)
+  return(y)
+}
+
+ce_richness <- calc(ce_data, fun = ce_presence)
+
+plot(ce_richness, col = "cornflowerblue")
+```
+
+**Figure 1.** Individual species presence raster layers of the 13 of 35 cetacean species over the 0.7 presence threshold (3 species shown are absent in all of the range). The presence of each species was determined by extrapolating probability data where species with a probability of presence in a cell that is greater than 0.7 were considered to be present, while species with a probability lower than 0.7 were considered to be absent. 
+```{r}
+richness_df <- rasterToPoints(ce_richness) %>% 
+  as.data.frame() %>% 
+  pivot_longer(cols = 3:37, names_to = "species", values_to = "presence") %>% 
+  group_by(x, y) %>% 
+  summarize(richness = sum(presence, na.rm = TRUE))
+ 
+nat_earth <- ne_countries(scale = "medium", returnclass = "sf")
+
+#st_crs(nat_earth)
+
+nat_earth <- st_transform(nat_earth, st_crs(ce_data))
+ 
+#st_crs(nat_earth)
+#plot(nat_earth)
+```
+
+
+### Cetacean Richness along the California Coastline
+```{r, include=TRUE}
+ggplot()+
+  geom_raster(data = richness_df, aes(x = x, y = y, fill= richness))+
+  geom_sf(data = nat_earth, fill = "black") +
+  coord_sf(xlim = c(-125, -115), ylim =c(32,38))+
+  scale_fill_gradient(low = 'skyblue1', high = 'navy') +
+  theme_minimal()+
+  labs(fill = "Cetacean Species Richness", 
+       x = "Longitude", 
+       y = "Latitude")
+```
+
+**Figure 2.** Cetacean species (whales & dolphins) richness is shown along the California coastline, with richness displayed by a gradient of light blue, indicating lower species richness, to dark blue, indicating higher species richness.  

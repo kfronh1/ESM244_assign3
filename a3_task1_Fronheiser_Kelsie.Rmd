@@ -68,4 +68,4 @@ ggplot(data = oil_counts) +
   labs(fill = "Number of oil spills")
 ```
 
-**Figure 2.** California oil spill events for the year 2008 are summed by county, with the abundance of spills displayed by a gradient between zero spills in white to 500+ spills in red. The county with the highest number of oil spills in 2008 was Los Angeles County.
+**Figure 2.** California oil spill events for the year 2008 are summed by county, with the abundance of spills displayed by a gradient from zero spills in white to 500+ spills in red. The county with the highest number of oil spills in 2008 was Los Angeles County.

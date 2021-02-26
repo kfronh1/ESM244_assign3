@@ -13,7 +13,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE, message = FALSE)
 ```
-The text used in this report is The Great Gatsby by F. Scott Fitzgerald, downloaded from [Project Guntenberg](https://www.gutenberg.org/ebooks/64317).
+The text used in this report is the novel *The Great Gatsby* by F. Scott Fitzgerald, downloaded from [Project Guntenberg](https://www.gutenberg.org/ebooks/64317).
 ```{r}
 library(tidyverse)
 library(tidytext)
@@ -67,7 +67,7 @@ word_cloud <-  ggplot(data = top100_words, aes(label = word)) +
 word_cloud
 ```
 
-**Figure 1.** This word cloud shows the top 100 words used in The Great Gatsby. The frequency of word use is displayed by size and color, with the largest dark blue word being the most used; Gatbsy.
+**Figure 1.** This word cloud shows the top 100 words used in The Great Gatsby. The frequency of word use is displayed by size and color, with larger & darker colored words used more frequently. The word that is used the most in the novel is "Gatsby".
 
 ## Sentiment Analysis of The Great Gatsby by Chapter
 ```{r}
@@ -87,4 +87,4 @@ ggplot() +
   labs(x = "Chapter", y = "Mean Sentiment")
 ```
 
-**Figure 2.** This sentiment analysis shows the mean sentiment value per chapter. The analysis was run using the 'afinn' lexicon.
+**Figure 2.** This sentiment analysis shows the mean sentiment value of the words used per chapter. The analysis was run using the 'afinn' lexicon.
